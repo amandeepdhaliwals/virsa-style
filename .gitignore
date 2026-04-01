@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env
+.env.local
+homepage-content.json
+settings.json
+src/generated/
+*.log
+.DS_Store
+public/images/uploads/

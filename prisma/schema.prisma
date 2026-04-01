@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  password       String
+  phone          String?
+  emailVerified  Boolean   @default(false)
+  verifyOtp      String?
+  verifyOtpExpiry DateTime?
+  adminNotes     String?   // Internal notes visible only to admin
+  blocked        Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  addresses Address[]
+  orders    Order[]
+  wishlist  Wishlist[]
+  reviews   Review[]
+  customStitchingOrders CustomStitchingOrder[]
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  pincode    String
+  country    String  @default("India")
+  isDefault  Boolean @default(false)
+  createdAt  DateTime @default(now())
+  orders     Order[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  products    Product[]
+}
+
+// What type of product this is
+enum ProductType {
+  FOOTWEAR    // Jutti, Boot, Chappal — standard buy
+  SUIT        // Unstitched suit — can add stitching
+  DRESS       // Ready-made dress — standard buy
+  ACCESSORY   // Any other standard product
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  sku          String?
+  description  String?
+  price        Float         // Base fabric/product price
+  comparePrice Float?
+  costPrice    Float?
+  images       String[]      // Model pics (stitched look)
+  fabricImages String[]      // Unstitched fabric / material close-up pics
+  sizes        String[]      // For footwear: 6,7,8,9,10 | For suits: not used (custom measurements)
+  colors       String[]
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  productType  ProductType   @default(DRESS)
+  featured     Boolean       @default(false)
+  status       ProductStatus @default(ACTIVE)
+  inStock      Boolean       @default(true)
+  stock        Int           @default(0)
+  lowStockAt   Int           @default(5)
+  tags         String[]
+  metaTitle    String?
+  metaDesc     String?
+  weight       Float?
+
+  // Suit-specific fields
+  fabricType    String?       // Cotton, Silk, Georgette, etc.
+  suitPieces    String?       // "Kameez + Salwar + Dupatta", "Kameez + Plazo + Dupatta"
+  workType      String?       // Embroidery, Print, Handwork, etc.
+  washCare      String?       // Dry Clean, Machine Wash, etc.
+  deliveryDays  Int?          // Estimated days (e.g., 3-4 for stitched, 1-2 for unstitched)
+
+  // Stitching pricing (if product type is SUIT)
+  stitchingAvailable Boolean  @default(false)
+  baseStitchingPrice Float?   // Base stitching charge
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orderItems   OrderItem[]
+  wishlist     Wishlist[]
+  reviews      Review[]
+  stitchingOptions StitchingOption[]
+}
+
+// Admin-managed stitching add-on options per product or globally
+model StitchingOption {
+  id         String  @id @default(cuid())
+  productId  String?
+  product    Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   String  // "NECK", "SLEEVE", "BOTTOM", "EXTRA"
+  name       String  // "V-Neck", "Full Sleeve", "Lining", etc.
+  price      Float   @default(0) // Additional charge (0 = included in base)
+  isDefault  Boolean @default(false) // Pre-selected option
+  order      Int     @default(0)
+  createdAt  DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  COD
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addressId     String
+  address       Address       @relation(fields: [addressId], references: [id])
+  items         OrderItem[]
+  subtotal      Float
+  shipping      Float         @default(0)
+  discount      Float         @default(0)
+  total         Float
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod String?
+  trackingId    String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Float
+  quantity  Int
+  size      String?
+  color     String?
+  image     String?
+
+  // Stitching details (for suits)
+  wantStitching    Boolean @default(false)
+  stitchingPrice   Float?  // Total stitching charge for this item
+  customizations   String? // JSON: {"neck": "V-Neck", "sleeve": "Full Sleeve", ...}
+  measurements     String? // JSON: {"bust": "36", "waist": "30", "hip": "38", ...}
+  designReference  String? // WhatsApp reference note or image URL
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  discountType  String    // "PERCENT" or "FIXED"
+  discountValue Float
+  minOrder      Float     @default(0)
+  maxUses       Int       @default(0)  // 0 = unlimited
+  usedCount     Int       @default(0)
+  active        Boolean   @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+// Custom Stitching — customer sends their own fabric
+enum CustomStitchingStatus {
+  ORDER_PLACED
+  FABRIC_SHIPPED
+  FABRIC_RECEIVED
+  STITCHING_STARTED
+  STITCHING_DONE
+  SHIPPED_BACK
+  DELIVERED
+  CANCELLED
+}
+
+model CustomStitchingOrder {
+  id              String                @id @default(cuid())
+  orderNumber     String                @unique
+  userId          String
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          CustomStitchingStatus @default(ORDER_PLACED)
+
+  // Customer info
+  customerName    String
+  customerPhone   String
+  customerEmail   String
+
+  // Return address
+  addressLine1    String
+  addressLine2    String?
+  city            String
+  state           String
+  pincode         String
+
+  // Suit details
+  suitType        String
+  neckStyle       String
+  sleeveStyle     String
+  extras          String[]
+  specialNotes    String?
+
+  // Measurements JSON
+  measurements    String
+
+  // Reference images uploaded by customer
+  referenceImages String[]
+
+  // Pricing
+  stitchingPrice  Float
+  returnShipping  Float     @default(100)
+  totalPaid       Float
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   String?
+
+  // Fabric courier (customer → shop)
+  fabricCourierName    String?
+  fabricTrackingNumber String?
+  fabricReceivedAt     DateTime?
+
+  // Return courier (shop → customer)
+  returnCourierName    String?
+  returnTrackingNumber String?
+  shippedBackAt        DateTime?
+
+  // Admin
+  adminNotes      String?
+  resultImages    String[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}

@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Gurmukhi';
+  src: url('/fonts/NotoSansGurmukhi-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PlayfairItalic';
+  src: url('/fonts/PlayfairDisplay-Italic.ttf') format('truetype');
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --background: #F9F5F0;
+  --foreground: #4A4A4A;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F9F5F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #C48B9F;
+  border-radius: 3px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-image {
+  transition: transform 0.5s ease;
+}
+
+.btn-luxury {
+  @apply bg-accent text-white px-6 py-3 rounded-none tracking-wider uppercase text-sm font-medium transition-all duration-300;
+}
+.btn-luxury:hover {
+  @apply bg-accent-dark shadow-lg;
+}
+
+.btn-outline-luxury {
+  @apply border border-accent text-accent px-6 py-3 rounded-none tracking-wider uppercase text-sm font-medium transition-all duration-300;
+}
+.btn-outline-luxury:hover {
+  @apply bg-accent text-white;
+}
+
+/* Scroll indicator pulse */
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; height: 2rem; }
+  50% { opacity: 1; height: 3rem; }
+}
+.scroll-line {
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+/* Smooth scroll overrides */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.33%); }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
