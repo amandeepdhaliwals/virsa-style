@@ -5,7 +5,8 @@ import { Save, Check, Plus, Trash2, Image as ImageIcon, Type, GripVertical } fro
 import ImageUploadButton from "@/components/ImageUploadButton";
 
 interface HeroSlide {
-  image: string; subtitle: string; title: string; description: string; cta: string; link: string;
+  desktopImage: string; mobileImage: string;
+  subtitle: string; title: string; description: string; cta: string; link: string;
 }
 interface PromoBanner {
   image: string; subtitle: string; title: string; link: string;
@@ -104,7 +105,7 @@ export default function AdminHomepagePage() {
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Hero Slides ({content.heroSlides.length})</h2>
             <button onClick={() => setContent({
               ...content,
-              heroSlides: [...content.heroSlides, { image: "", subtitle: "", title: "", description: "", cta: "Shop Now", link: "/shop" }],
+              heroSlides: [...content.heroSlides, { desktopImage: "", mobileImage: "", subtitle: "", title: "", description: "", cta: "Shop Now", link: "/shop" }],
             })} className="bg-gray-800 text-white px-3 py-1.5 rounded text-xs hover:bg-gray-700 flex items-center gap-1">
               <Plus size={12} /> Add Slide
             </button>
@@ -123,9 +124,15 @@ export default function AdminHomepagePage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <ImageUploadButton label="Slide Image" value={slide.image}
-                    onChange={(url) => { const s = [...content.heroSlides]; s[i] = { ...s[i], image: url }; setContent({ ...content, heroSlides: s }); }} />
+                  <ImageUploadButton label="🖥️ Desktop Image (1600×900 landscape)" value={slide.desktopImage}
+                    onChange={(url) => { const s = [...content.heroSlides]; s[i] = { ...s[i], desktopImage: url }; setContent({ ...content, heroSlides: s }); }} />
                 </div>
+                <div>
+                  <ImageUploadButton label="📱 Mobile Image (600×900 portrait)" value={slide.mobileImage}
+                    onChange={(url) => { const s = [...content.heroSlides]; s[i] = { ...s[i], mobileImage: url }; setContent({ ...content, heroSlides: s }); }} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Subtitle (small text above title)</label>
                   <input type="text" value={slide.subtitle}

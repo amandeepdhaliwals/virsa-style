@@ -4,7 +4,8 @@ import { join } from "path";
 const CONTENT_FILE = join(process.cwd(), "homepage-content.json");
 
 export interface HeroSlide {
-  image: string;
+  desktopImage: string;  // Landscape 1600×900
+  mobileImage: string;   // Portrait 600×900
   subtitle: string;
   title: string;
   description: string;
@@ -43,7 +44,8 @@ const DEFAULT_CONTENT: HomepageContent = {
   marquee: "FREE SHIPPING ABOVE ₹999  ·  LUXURY BOUTIQUE — BARNALA, PUNJAB  ·  CUSTOM STITCHING & TAILORING  ·  UNSTITCHED & STITCHED SUITS  ·  PUNJABI JUTTIS & FOOTWEAR  ·  PREPAID ORDERS ONLY  ·  ",
   heroSlides: [
     {
-      image: "/images/hero-1.jpg",
+      desktopImage: "/images/hero-1.jpg",
+      mobileImage: "/images/hero-1.jpg",
       subtitle: "ਵਿਰਸਾ Style Boutique",
       title: "Tradition Meets\nElegance",
       description: "Premium unstitched suits with expert tailoring. Customize your perfect outfit.",
@@ -51,7 +53,8 @@ const DEFAULT_CONTENT: HomepageContent = {
       link: "/shop",
     },
     {
-      image: "/images/hero-2.jpg",
+      desktopImage: "/images/hero-2.jpg",
+      mobileImage: "/images/hero-2.jpg",
       subtitle: "Custom Stitching",
       title: "Your Design\nOur Craft",
       description: "Choose your fabric, select your design, send your measurements. We stitch perfection.",
@@ -59,7 +62,8 @@ const DEFAULT_CONTENT: HomepageContent = {
       link: "/shop?category=punjabi-salwar-suit",
     },
     {
-      image: "/images/hero-3.jpg",
+      desktopImage: "/images/hero-3.jpg",
+      mobileImage: "/images/hero-3.jpg",
       subtitle: "Handcrafted Heritage",
       title: "Punjabi Jutti\nCollection",
       description: "Traditional Phulkari & Kundan juttis handcrafted with love. Boots & chappals too.",
@@ -67,7 +71,8 @@ const DEFAULT_CONTENT: HomepageContent = {
       link: "/shop?category=punjabi-jutti",
     },
     {
-      image: "/images/hero-4.jpg",
+      desktopImage: "/images/hero-4.jpg",
+      mobileImage: "/images/hero-4.jpg",
       subtitle: "Wedding Season",
       title: "Sharara &\nGharara Suits",
       description: "Royal suits for your special day. Heavy embroidery, silk fabrics, custom fitting.",

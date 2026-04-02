@@ -9,18 +9,34 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 gsap.registerPlugin(ScrollTrigger);
 
 const defaultSlides = [
-  { image: "/images/hero-1.jpg", subtitle: "ਵਿਰਸਾ Style Boutique", title: "Tradition Meets\nElegance", description: "Premium unstitched suits with expert tailoring.", cta: "Shop Suits", link: "/shop" },
-  { image: "/images/hero-2.jpg", subtitle: "Custom Stitching", title: "Your Design\nOur Craft", description: "Choose your fabric, select your design, send your measurements.", cta: "Explore Suits", link: "/shop?category=punjabi-salwar-suit" },
-  { image: "/images/hero-3.jpg", subtitle: "Handcrafted Heritage", title: "Punjabi Jutti\nCollection", description: "Traditional Phulkari & Kundan juttis handcrafted with love.", cta: "Shop Footwear", link: "/shop?category=punjabi-jutti" },
-  { image: "/images/hero-4.jpg", subtitle: "Wedding Season", title: "Sharara &\nGharara Suits", description: "Royal suits for your special day. Heavy embroidery, silk fabrics.", cta: "Shop Bridal", link: "/shop?category=sharara-suit" },
+  { desktopImage: "/images/hero-1.jpg", mobileImage: "/images/hero-1.jpg", subtitle: "ਵਿਰਸਾ Style Boutique", title: "Tradition Meets\nElegance", description: "Premium unstitched suits with expert tailoring.", cta: "Shop Suits", link: "/shop" },
+  { desktopImage: "/images/hero-2.jpg", mobileImage: "/images/hero-2.jpg", subtitle: "Custom Stitching", title: "Your Design\nOur Craft", description: "Choose your fabric, select your design, send your measurements.", cta: "Explore Suits", link: "/shop?category=punjabi-salwar-suit" },
+  { desktopImage: "/images/hero-3.jpg", mobileImage: "/images/hero-3.jpg", subtitle: "Handcrafted Heritage", title: "Punjabi Jutti\nCollection", description: "Traditional Phulkari & Kundan juttis handcrafted with love.", cta: "Shop Footwear", link: "/shop?category=punjabi-jutti" },
+  { desktopImage: "/images/hero-4.jpg", mobileImage: "/images/hero-4.jpg", subtitle: "Wedding Season", title: "Sharara &\nGharara Suits", description: "Royal suits for your special day. Heavy embroidery, silk fabrics.", cta: "Shop Bridal", link: "/shop?category=sharara-suit" },
 ];
 
 interface Slide {
-  image: string; subtitle: string; title: string; description: string; cta: string; link: string;
+  desktopImage: string;
+  mobileImage: string;
+  subtitle: string; title: string; description: string; cta: string; link: string;
+  // Legacy support
+  image?: string;
 }
 
 export default function AnimatedHero({ slides: propSlides }: { slides?: Slide[] }) {
-  const slides = propSlides && propSlides.length > 0 ? propSlides : defaultSlides;
+  const slides = (propSlides && propSlides.length > 0 ? propSlides : defaultSlides).map((s) => ({
+    ...s,
+    desktopImage: s.desktopImage || s.image || "/images/hero-1.jpg",
+    mobileImage: s.mobileImage || s.image || "/images/hero-1.jpg",
+  }));
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -128,10 +144,17 @@ export default function AnimatedHero({ slides: propSlides }: { slides?: Slide[] 
               i === current ? "opacity-100" : "opacity-0"
             }`}
           >
+            {/* Desktop image */}
             <img
-              src={s.image}
+              src={s.desktopImage}
               alt={s.title}
-              className="w-full h-full object-cover scale-105"
+              className="hidden md:block w-full h-full object-cover scale-105"
+            />
+            {/* Mobile image */}
+            <img
+              src={s.mobileImage}
+              alt={s.title}
+              className="block md:hidden w-full h-full object-cover scale-105"
             />
           </div>
         ))}
