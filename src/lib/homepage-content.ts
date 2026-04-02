@@ -1,7 +1,11 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 
-const CONTENT_FILE = join(process.cwd(), "homepage-content.json");
+// Use absolute path based on project root to ensure it works in production
+const PROJECT_ROOT = process.env.PROJECT_ROOT || process.cwd();
+const CONTENT_FILE = join(PROJECT_ROOT, "homepage-content.json");
+
+console.log("[Homepage Content] File path:", CONTENT_FILE);
 
 export interface HeroSlide {
   desktopImage: string;  // Landscape 1600×900
@@ -124,5 +128,11 @@ export function getHomepageContent(): HomepageContent {
 }
 
 export function saveHomepageContent(content: HomepageContent) {
-  writeFileSync(CONTENT_FILE, JSON.stringify(content, null, 2));
+  try {
+    writeFileSync(CONTENT_FILE, JSON.stringify(content, null, 2));
+    console.log("[Homepage Content] Saved successfully to:", CONTENT_FILE);
+  } catch (error) {
+    console.error("[Homepage Content] SAVE FAILED:", error);
+    throw error;
+  }
 }

@@ -32,13 +32,23 @@ export default function AdminHomepagePage() {
   const handleSave = async () => {
     if (!content) return;
     setSaving(true); setSaved(false);
-    await fetch("/api/admin/homepage", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(content),
-    });
-    setSaving(false); setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const res = await fetch("/api/admin/homepage", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(content),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        const data = await res.json();
+        alert("Save failed: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      alert("Save failed: Network error");
+    }
+    setSaving(false);
   };
 
   if (!content) return <p className="p-8 text-gray-500">Loading...</p>;

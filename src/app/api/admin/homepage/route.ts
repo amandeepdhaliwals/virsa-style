@@ -4,6 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { getHomepageContent, saveHomepageContent } from "@/lib/homepage-content";
 
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || (session.user as { role?: string }).role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   return NextResponse.json(getHomepageContent());
 }
 
@@ -13,7 +17,12 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const content = await req.json();
-  saveHomepageContent(content);
-  return NextResponse.json({ message: "Homepage content saved" });
+  try {
+    const content = await req.json();
+    saveHomepageContent(content);
+    return NextResponse.json({ message: "Homepage content saved successfully" });
+  } catch (error) {
+    console.error("Homepage save error:", error);
+    return NextResponse.json({ error: "Failed to save content" }, { status: 500 });
+  }
 }
