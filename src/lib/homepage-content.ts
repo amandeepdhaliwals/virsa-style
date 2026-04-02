@@ -119,7 +119,15 @@ const DEFAULT_CONTENT: HomepageContent = {
 export function getHomepageContent(): HomepageContent {
   if (existsSync(CONTENT_FILE)) {
     try {
-      return JSON.parse(readFileSync(CONTENT_FILE, "utf-8"));
+      const saved = JSON.parse(readFileSync(CONTENT_FILE, "utf-8"));
+      // Merge with defaults — ensures no missing fields crash the app
+      return {
+        marquee: saved.marquee || DEFAULT_CONTENT.marquee,
+        heroSlides: saved.heroSlides && saved.heroSlides.length > 0 ? saved.heroSlides : DEFAULT_CONTENT.heroSlides,
+        splitBanners: saved.splitBanners && saved.splitBanners.length === 2 ? saved.splitBanners : DEFAULT_CONTENT.splitBanners,
+        saleBanner: saved.saleBanner && saved.saleBanner.title ? saved.saleBanner : DEFAULT_CONTENT.saleBanner,
+        instagramPosts: saved.instagramPosts && saved.instagramPosts.length > 0 ? saved.instagramPosts : DEFAULT_CONTENT.instagramPosts,
+      };
     } catch {
       return DEFAULT_CONTENT;
     }
