@@ -26,27 +26,22 @@ export default function ImageUploader({ images, onChange }: Props) {
     }
 
     try {
-      // Try Cloudinary first, fallback to local upload
-      let res = await fetch("/api/upload", { method: "POST", body: formData });
-
-      if (res.ok) {
-        const { urls } = await res.json();
-        onChange([...images, ...urls]);
-      } else {
-        // Fallback: upload each file locally
-        const newUrls: string[] = [];
-        for (let i = 0; i < files.length; i++) {
-          const localForm = new FormData();
-          localForm.append("file", files[i]);
-          const localRes = await fetch("/api/upload-local", { method: "POST", body: localForm });
-          if (localRes.ok) {
-            const { url } = await localRes.json();
-            newUrls.push(url);
-          }
+      // Upload each file locally (fast, no external service needed)
+      const newUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const localForm = new FormData();
+        localForm.append("file", files[i]);
+        const res = await fetch("/api/upload-local", { method: "POST", body: localForm });
+        if (res.ok) {
+          const { url } = await res.json();
+          newUrls.push(url);
+        } else {
+          const data = await res.json();
+          throw new Error(data.error || "Upload failed");
         }
-        if (newUrls.length > 0) onChange([...images, ...newUrls]);
-        else throw new Error("Upload failed");
       }
+      if (newUrls.length > 0) onChange([...images, ...newUrls]);
+      else throw new Error("No files uploaded");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
